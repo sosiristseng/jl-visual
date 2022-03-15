@@ -4,7 +4,13 @@ env:
   JULIA_VERSION: "1.7"
   PYTHON_VERSION: "3.9"
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -44,7 +50,7 @@ jobs:
       - name: Cache Jupyter book outputs
         uses: actions/cache@v2
         env:
-          cache-name: "jb-01"
+          cache-name: "jb"
         with:
           path: ./docs/_build/.jupyter_cache/
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('Manifest.toml', 'requirements.txt') }}-${{ hashFiles('**/*.ipynb') }}
