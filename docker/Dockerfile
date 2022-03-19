@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 # Install apt packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git openssh-client curl parallel brotli \
+    git curl gzip brotli \
     # build-essential \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,7 +27,7 @@ RUN julia --threads=auto --color=yes -e 'import Pkg; Pkg.add("IJulia")' \
 # Julia sysimage (optional)
 # RUN julia --threads=auto --color=yes -e 'import Pkg; Pkg.add("PackageCompiler"); \
 #     create_sysimage(["Example"]; project= ".", sysimage_path="sysimage.so"); \
-#     using IJulia; installkernel("Julia", "-J sysimage.so") \
+#     using IJulia; installkernel("Julia", "-J sysimage.so"); \
 #     Pkg.remove("PackageCompiler"); Pkg.gc()'
 
 # Julia command
