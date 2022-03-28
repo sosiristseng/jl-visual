@@ -15,9 +15,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip wheel setuptools && pip install --no-cache-dir -r requirements.txt
 
 # Build Julia environment
-COPY Project.toml Manifest.toml ./
-RUN julia --threads=auto --color=yes -e 'import Pkg; Pkg.add("IJulia")' \
-    && julia --threads=auto --color=yes --project=@. -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()'
+COPY Project.toml Manifest.toml build_kernel.jl ./
+RUN julia --threads=auto --color=yes --project=@. -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()' && julia --threads=auto --color=yes build_kernel.jl
 
 # Julia sysimage (optional)
 # RUN julia --threads=auto --color=yes -e 'import Pkg; Pkg.add("PackageCompiler"); using PackageCompiler;\
@@ -26,7 +25,8 @@ RUN julia --threads=auto --color=yes -e 'import Pkg; Pkg.add("IJulia")' \
 #     Pkg.remove("PackageCompiler"); Pkg.gc()'
 
 # Julia command
-CMD ["julia"]
+# CMD ["julia"]
 
 # If using sysimage
-# CMD ["julia", "-J", "sysimage.so"]
+CMD ["julia", "-J", "sysimage.so"]
+
