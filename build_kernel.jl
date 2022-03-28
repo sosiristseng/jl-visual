@@ -15,7 +15,7 @@ sysimage_path = joinpath(@__DIR__, "sysimage.so")
 PackageCompiler.create_sysimage(
     ;                               # empty package list means baking all packages
     project=".",
-    sysimage_path=sysmiage_path,
+    sysimage_path=sysimage_path,
     cpu_target=PackageCompiler.default_app_cpu_target()
 )
 
