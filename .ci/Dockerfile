@@ -1,8 +1,11 @@
-FROM ghcr.io/sosiristseng/docker-juliabook:1.7.3.10
+FROM ghcr.io/sosiristseng/docker-juliabook:1.7.3.11
 
 ENV LC_ALL C.UTF-8
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/
+
+# FFMPEG
+RUN apt-get update && apt-get install -y ffmpeg --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Python deps (matplotlib)
 COPY requirements.txt .
