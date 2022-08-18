@@ -9,7 +9,7 @@ ENV LC_ALL C.UTF-8
 RUN apt-get update && apt-get install -y ffmpeg --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
-COPY .ci/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip wheel setuptools \
     && pip install --no-cache-dir -r requirements.txt
 
