@@ -25,7 +25,7 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update -q
-          sudo apt-get install -qqy parallel
+          sudo apt-get install -qqy parallel ffmpeg
       - name: Setup Python ${{ env.PYTHON_VER }}
         uses: actions/setup-python@v4
         with:
