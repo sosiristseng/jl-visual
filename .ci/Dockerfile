@@ -14,9 +14,10 @@ ENV PATH $JULIA_PATH/bin:$PATH
 COPY --from=julia:1.8.0 ${JULIA_PATH} /usr/local/
 
 # Python dependencies
-COPY .ci/requirements.txt .
+COPY .ci/requirements.txt requirements-ci.txt
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -U pip wheel setuptools \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt -r requirements-ci.txt
 
 # Julia environment
 COPY Project.toml Manifest.toml ./
