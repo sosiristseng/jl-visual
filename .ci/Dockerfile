@@ -11,7 +11,7 @@ RUN apt-get update -q && apt-get install -qqy ffmpeg --no-install-recommends && 
 # Julia
 ENV JULIA_PATH /usr/local/julia/
 ENV PATH $JULIA_PATH/bin:$PATH
-COPY --from=julia:1.8.0 ${JULIA_PATH} /usr/local/
+COPY --from=julia:1.8.1 ${JULIA_PATH} /usr/local/
 
 # Python dependencies
 COPY .ci/requirements.txt requirements-ci.txt
