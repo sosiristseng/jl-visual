@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Notebooks need to be executed
+        # Notebooks to be executed
         notebook:
           - plotsjl-gallery
           - pyplot-gizmaa
