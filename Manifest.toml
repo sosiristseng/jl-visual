@@ -84,9 +84,9 @@ version = "0.4.0"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "0d7d213133d948c56e8c2d9f4eab0293491d8e4a"
+git-tree-sha1 = "04db820ebcfc1e053bd8cbb8d8bccf0ff3ead3f7"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.75"
+version = "0.25.76"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -110,9 +110,9 @@ uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "87519eb762f85534445f5cda35be12e32759ee14"
+git-tree-sha1 = "802bfc139833d2ba893dd9e62ba1767c88d708ae"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.13.4"
+version = "0.13.5"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -260,9 +260,9 @@ version = "0.11.16"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "595c0b811cf2bab8b0849a70d9bd6379cc1cfb52"
+git-tree-sha1 = "6c01a9b494f6d2a9fc180a08b182fcb06f0958a0"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.4.1"
+version = "2.4.2"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
