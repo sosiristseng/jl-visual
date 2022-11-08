@@ -1,7 +1,7 @@
 FROM python:3.11.0-slim
 
 # System packages
-# RUN apt-get update && apt-get install -y git parallel --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ffmpeg --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Julia
 ENV JULIA_PATH /usr/local/julia/
