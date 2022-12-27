@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y ffmpeg --no-install-recommends && rm -r
 # Julia
 ENV JULIA_PATH /usr/local/julia/
 ENV PATH $JULIA_PATH/bin:$PATH
-COPY --from=julia:1.8.3 ${JULIA_PATH} /usr/local/
+COPY --from=julia:1.8.4 ${JULIA_PATH} /usr/local/
 
 # Python dependencies
 # e.g. matplotlib
