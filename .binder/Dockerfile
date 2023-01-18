@@ -1,1 +1,1 @@
-FROM ghcr.io/ww-jl/pyplot:binder
+FROM ghcr.io/ww-jl/plot:binder
