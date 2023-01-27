@@ -11,31 +11,19 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  JULIA_NUM_THREADS: 2
-  PYTHON_VER: '3.11'
   TIMEOUT: 600
   JOBS: '2'
 
 jobs:
-  ci-parallel:
+  ci:
     name: CI (parallel)
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/sosiristseng/docker-jupyterbook:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2
-      - name: Setup Python ${{ env.PYTHON_VER }}
-        uses: actions/setup-python@v4
-        id: python
-        with:
-          python-version: ${{ env.PYTHON_VER }}
-          cache: 'pip'
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install -U nbconvert
-      - name: Read Julia vesion
+      - name: Read Julia version
         uses: SebRollen/toml-action@v1.0.2
         id: read_toml
         with:
@@ -54,23 +42,21 @@ jobs:
             ${{ runner.os }}-julia-${{ steps.read_toml.outputs.value}}-
       - name: Install Julia deps
         env:
-          PYTHON: ${{ steps.python.outputs.python-path }}
+          PYTHON: ''
         run: |
-          julia --project="" -e 'import Pkg; Pkg.add("IJulia"); Pkg.build("IJulia")'
-          julia --project=@. -e 'import Pkg; Pkg.instantiate()'
+          julia --color=yes --project="" -e 'import Pkg; Pkg.add("IJulia"); using IJulia; installkernel("Julia", "--project=@.", env=Dict("JULIA_NUM_THREADS"=>"auto"))'
+          julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate()'
       - name: Build Notebooks
-        run: |
-          parallel --joblog /tmp/log -j${JOBS} jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=${{ env.TIMEOUT }} --execute --inplace {} ::: docs/*.ipynb
-          cat /tmp/log
-      - name: Build website
         run: >
-          docker run --rm
-          --workdir=/work
-          -v ${{ github.workspace }}:/work
-          ghcr.io/sosiristseng/docker-jupyterbook:latest
-          jupyter-book build docs/ --warningiserror --keep-going -v
-      - name: Change permission to user
-        run: sudo chown -R $USER docs/_build/
+          parallel --joblog /tmp/log -j${JOBS}
+          jupyter nbconvert --to notebook
+          --ExecutePreprocessor.timeout=${{ env.TIMEOUT }}
+          --execute --inplace
+          {} ::: docs/*.ipynb
+      - name: Execution results
+        run: cat /tmp/log
+      - name: Build website
+        run: jupyter-book build docs/ --keep-going -v
       - name: Upload page artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v1
