@@ -12,6 +12,7 @@ concurrency:
 
 env:
   JULIA_DEPOT_PATH: '/tmp/juliapkgs'
+  JULIA_NUM_THREADS: 'auto'
   JULIA_CACHE_NUM: '1'
   TIMEOUT: 600
   JOBS: '2'
@@ -32,7 +33,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VER }}
       - name: Install Python dependencies
-        run: pip install -U matplotlib nbconvert
+        run: pip install -U nbconvert matplotlib
       - name: Read Julia version
         uses: SebRollen/toml-action@v1.0.2
         id: read_toml
@@ -56,8 +57,8 @@ jobs:
         env:
           PYTHON: ${{ steps.python.outputs.python-path }}
         run: |
-          julia --color=yes --project="" -e 'import Pkg; Pkg.add("IJulia"); using IJulia; installkernel("Julia", "--project=@.", env=Dict("JULIA_NUM_THREADS"=>"auto"))'
-          julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate()'
+          julia --color=yes --project="" .github/install_kernel.jl
+          julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()'
       - name: Build notebooks
         run: >
           parallel --joblog /tmp/log -j${JOBS}
@@ -72,6 +73,7 @@ jobs:
         with:
           name: notebook
           path: docs/**.ipynb
+          retention-days: 1
 
   jupyter-book:
     needs: execute
@@ -87,7 +89,11 @@ jobs:
       - name: Download notebooks
         uses: actions/download-artifact@v3
         with:
+          name: notebook
           path: out/
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: out
       - name: Move notebooks
         run: find out/ -type f -iname '*.ipynb' -exec mv -t docs/ {} +
       - name: Build website
