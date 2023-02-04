@@ -1,4 +1,4 @@
-name: Build Jupyter Notebooks
+name: Execute Jupyter notebooks with dynamic parallel matrix
 
 on:
   push:
@@ -10,69 +10,97 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  packages: write
+
 env:
-  JULIA_DEPOT_PATH: '/tmp/juliapkgs'
-  JULIA_NUM_THREADS: 'auto'
-  JULIA_CACHE_NUM: '1'
   TIMEOUT: 600
-  JOBS: '2'
-  PYTHON_VER: '3.11'
+  DFILE: '.github/julia.Dockerfile'
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Login to ghcr
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+      - name: Build and cache Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ${{ env.DFILE }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
+          cache-to: type=inline
+      - name: List notebooks as a JSON array
+        id: set-matrix
+        run: echo "matrix=$(python -c 'import glob, json; print(json.dumps(glob.glob("docs/*.ipynb")))')" >> $GITHUB_OUTPUT
   execute:
+    needs: setup
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJSON(needs.setup.outputs.matrix) }} # Notebooks need to be executed
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
-      - name: Setup Python ${{ env.PYTHON_VER }}
-        uses: actions/setup-python@v4
-        id: python
+      - name: Login to ghcr
+        uses: docker/login-action@v2
         with:
-          python-version: ${{ env.PYTHON_VER }}
-      - name: Install Python dependencies
-        run: pip install -U nbconvert matplotlib
-      - name: Read Julia version
-        uses: SebRollen/toml-action@v1.0.2
-        id: read_toml
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
         with:
-          file: 'Manifest.toml'
-          field: 'julia_version'
-      - name: Write Julia version to env
-        run: echo "jlver=${{ steps.read_toml.outputs.value }}" >> $GITHUB_ENV
-      - name: Setup Julia ${{ env.jlver }}
-        uses: julia-actions/setup-julia@v1
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+      - name: Restore Docker container
+        uses: docker/build-push-action@v4
         with:
-          version: ${{ env.jlver }}
-      - name: Cache Julia dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.JULIA_DEPOT_PATH }}
-          key: ${{ runner.os }}-julia-${{ env.jlver }}-${{ env.JULIA_CACHE_NUM }}-${{ hashFiles('**/Manifest.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-julia-${{ env.jlver }}-${{ env.JULIA_CACHE_NUM }}-
-      - name: Install Julia dependencies
-        env:
-          PYTHON: ${{ steps.python.outputs.python-path }}
-        run: |
-          julia --color=yes --project="" .github/install_kernel.jl
-          julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()'
-      - name: Build notebooks
+          context: .
+          file: ${{ env.DFILE }}
+          load: true
+          tags: myimage:test
+          cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
+      - name: Execute Notebook
         run: >
-          parallel --joblog /tmp/log -j${JOBS}
-          jupyter nbconvert --to notebook
+          docker run --rm
+          --workdir=/tmp -v ${{ github.workspace }}:/tmp
+          myimage:test
+          jupyter nbconvert --to notebook --execute --inplace
           --ExecutePreprocessor.timeout=${{ env.TIMEOUT }}
-          --execute --inplace
-          {} ::: docs/*.ipynb
-      - name: Show execution results
-        run: cat /tmp/log
+          --ExecutePreprocessor.kernel_name=julia-$(julia -e 'print(VERSION.major,".",VERSION.minor)')
+          ${{ matrix.notebook }}
       - name: Upload Notebook
         uses: actions/upload-artifact@v3
         with:
           name: notebook
-          path: docs/**.ipynb
+          path: ${{ matrix.notebook }}
           retention-days: 1
 
   jupyter-book:
@@ -110,7 +138,7 @@ jobs:
   # GitHub status check
   # https://brunoscheufler.com/blog/2022-04-09-the-required-github-status-check-that-wasnt
   ci:
-    name: CI (parallel)
+    name: CI (matrix)
     needs: jupyter-book
     runs-on: ubuntu-latest
     if: always() # always run, so we never skip the check
