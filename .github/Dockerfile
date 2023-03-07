@@ -1,7 +1,5 @@
 FROM python:3.11.2-slim as base
 
-WORKDIR /work
-
 # Julia
 ENV JULIA_CI true
 ENV JULIA_NUM_THREADS "auto"
@@ -12,6 +10,8 @@ COPY --from=julia:1.8.5 ${JULIA_PATH} ${JULIA_PATH}
 
 FROM base
 
+WORKDIR /app
+
 # System packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
@@ -19,7 +19,7 @@ RUN apt-get update && \
 
 # Python dependencies. e.g. matplotlib
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir nbconvert
+RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir -r requirements.txt
 
 # Julia environment
 COPY Project.toml Manifest.toml ./
