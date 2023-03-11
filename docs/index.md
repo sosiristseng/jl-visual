@@ -1,6 +1,6 @@
-# PyPlot.jl examples
+# Julia visualization exmaple notebooks
 
-[PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl) is the famous Python visaulization `matplotlib` in Julia.
+- [Plots.jl](https://github.com/JuliaPlots/Plots.jl): powerful and convenient visualization mwith ultiple backends. See also [Plots.jl docs](http://docs.juliaplots.org/latest/)
+- [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl): `matplotlib` in Julia. See also [matplotlib docs](https://matplotlib.org/stable/index.html)
 
-- [matplotlib docs](https://matplotlib.org/stable/index.html)
-- The [PyPlot.jl examples](https://gist.github.com/gizmaa/7214002) by `gizmaa`.
+For [Makie.jl](https://github.com/JuliaPlots/Makie.jl) see the [Makie.jl docs](https://makie.juliaplots.org/stable/tutorials/).
