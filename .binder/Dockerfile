@@ -1,1 +1,1 @@
-FROM ghcr.io/sosiristseng/jl-plot:binder
+FROM ghcr.io/ww-jl/visual:binder
