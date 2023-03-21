@@ -22,6 +22,7 @@ env:
   PYTHON_VER: '3.11'
   GKSwstype: 100
   IMAGE_NAME: ghcr.io/${{ github.repository }}:binder
+  OUTPUT_BRANCH: out
 
 jobs:
   jupyter-book:
@@ -76,14 +77,28 @@ jobs:
           force_orphan: true
       - name: Build website
         run: jupyter-book build docs/
-      - name: Deploy Website
+      - name: Upload pages artifact
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
-          publish_branch: gh-pages
-          force_orphan: true
+          path: docs/_build/html
+
+  # Deployment to GH pages
+  deploy:
+    needs: jupyter-book
+    if: ${{ github.ref == 'refs/heads/main' }}
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
 
   binder:
     runs-on: ubuntu-latest
@@ -92,7 +107,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        ref: out
+        ref: ${{ env.OUTPUT_BRANCH }}
     - name: Remove binder folder if present
       run: rm -rf .binder/ || true
     - name: Setup Python ${{ env.PYTHON_VER }}
@@ -108,9 +123,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pull Image
+      run: docker pull ${{ env.IMAGE_NAME }} || true
     - name: Build binder image with repo2docker
       run: >
-        jupyter-repo2docker --ref out
+        jupyter-repo2docker
+        --ref ${{ env.OUTPUT_BRANCH }}
         --image-name ${{ env.IMAGE_NAME }}
         --cache-from ${{ env.IMAGE_NAME }}
         --push --no-run --user-id 1000 --user-name jovyan
