@@ -87,20 +87,3 @@ jobs:
           publish_branch: out
           exclude_assets: '.github,docs/_build'
           force_orphan: true
-
-  # Deployment job
-  deploy:
-    needs: jupyter-book
-    if: ${{ github.ref == 'refs/heads/main' }}
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
