@@ -111,6 +111,8 @@ ax.annotate(L"$\int x = \frac{x^2}{2} + C$",
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right")
 
+plt.gcf()
+
 # ## Axis placement
 
 import PyPlot as plt
@@ -145,7 +147,7 @@ ax.spines["bottom"].set_position(("axes",-0.05)) # Offset the bottom scale from 
 ax.set_xlabel("X Axis")
 ax.set_ylabel("Y Axis")
 
-fig
+plt.gcf()
 
 # ## Bar plot
 
@@ -174,6 +176,8 @@ ax.set_xlabel("X")
 ax.set_ylabel("Y")
 
 fig.suptitle("Bar Plot Examples")
+
+plt.gcf()
 
 # ## Broken axis subplots
 
@@ -204,6 +208,7 @@ ax2.set_ylim(10, 11)
 ax2.tick_params(bottom="off", labelbottom="off")
 ax2.spines["bottom"].set_visible(false)
 
+plt.gcf()
 
 ## Add Line Break Markings
 ## From https://matplotlib.org/examples/pylab_examples/broken_axis.html
@@ -219,7 +224,7 @@ ax.plot((1 - d, 1 + d), (1 - d, 1 + d), transform=ax.transAxes, color="k", clip_
 
 axes[2].scatter(x, y)
 
-fig
+plt.gcf()
 
 # ## Custom Time
 
@@ -261,6 +266,7 @@ ax.xaxis.set_minor_locator(minorlocator)
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right")
 plt.tight_layout()
+plt.gcf()
 
 # ## Error bar
 
@@ -285,7 +291,7 @@ ax.set_ylabel("Some Data")
 ax.grid("on")
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right") ## Autoformat the time format and rotate the labels so they don't overlap
-fig
+plt.gcf()
 
 # ## Histogram
 
@@ -302,7 +308,7 @@ ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.set_title("Histogram")
 
-fig
+plt.gcf()
 
 # ## Line collections
 
@@ -325,7 +331,7 @@ line_segments = matplotlib.collections.LineCollection(lines,colors=c)
 fig, ax = plt.subplots(figsize=(10,10))
 ax.add_collection(line_segments)
 ax.axis("image") ## Tight axis and 1:1 aspect ratio
-fig
+plt.gcf()
 
 # ## Major and minor ticks
 
@@ -362,7 +368,7 @@ ax.yaxis.set_minor_locator(my) ## Set interval of minor ticks
 ax.xaxis.set_tick_params(which="major",length=10,width=2,labelsize=16)
 ax.xaxis.set_tick_params(which="minor",length=5,width=2)
 
-fig
+plt.gcf()
 
 # ## Multiple axis
 
@@ -413,7 +419,7 @@ ax3.patch.set_visible(false) ## Make the patch (background) invisible so it does
 ax3.spines["top"].set_visible(false) ## Hide the top edge of the axis
 ax3.spines["bottom"].set_visible(false) ## Hide the bottom edge of the axis
 
-fig
+plt.gcf()
 
 # ### Sharing the Legend Box in Twin Axes
 
@@ -425,6 +431,7 @@ l1 = ax1.plot(x1, x1, "r-")
 ax2 = ax1.twinx()
 l2 = ax2.plot(x1, exp.(x1), "g-")
 ax1.legend([first(l1), first(l2)], ["x", "exp(x)"])
+plt.gcf()
 
 # ## Pie Chart
 
@@ -451,7 +458,7 @@ ax.pie(sizes,
         textprops=font)
 ax.axis("equal")
 ax.set_title("Beer")
-fig
+plt.gcf()
 
 # ## Quiver plots
 
@@ -466,7 +473,7 @@ fig, ax = plt.subplots(figsize=(10,10))
 q = ax.quiver(X,Y,U,V)
 ax.quiverkey(q,X=0.07,Y = 0.05, U = 10,coordinates="figure", label="Quiver key, length = 10",labelpos = "E")
 ax.set_title("Quiver Plot Example")
-fig
+plt.gcf()
 
 # ## Scatter Plot
 
@@ -484,7 +491,7 @@ ax.set_title("Scatter Plot")
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.grid("on")
-fig
+plt.gcf()
 
 # ## Subplots
 
@@ -508,7 +515,9 @@ plt.ylabel("This is a y axis")
 plt.title("224")
 fig.suptitle("2x2 Subplot")
 
-fig
+plt.gcf()
+
+#----
 
 ##  Shared Axis
 fig = plt.figure("pyplot_subplot_touching",figsize=(10,10))
@@ -538,7 +547,7 @@ plt.yticks(0.1:0.2:0.9)
 plt.ylim(0.0,1.0)
 plt.suptitle("3x1 Shared Axis")
 
-fig
+plt.gcf()
 
 # ## Surface plot
 
@@ -577,7 +586,7 @@ ax.set_ylabel("Y")
 ax.set_title("Contour Plot")
 fig.tight_layout()
 
-fig
+plt.gcf()
 
 # ## Windrose bar and line plots
 
@@ -599,9 +608,9 @@ ax.set_thetagrids(collect(0:dtheta:360-dtheta)) ## Show grid lines from 0 to 360
 ax.set_theta_zero_location("N") ## Set 0 degrees to the top of the plot
 ax.set_theta_direction(-1) ## Switch to clockwise
 
-fig
+plt.gcf()
 
-#---
+#-----
 
 fig = plt.figure("pyplot_windrose_barplot",figsize=(10,10)) ## Create a new figure
 ax = plt.axes(polar="true") ## Create a polar axis
@@ -613,7 +622,7 @@ ax.set_thetagrids(collect(0:dtheta:360-dtheta)) ## Show grid lines from 0 to 360
 ax.set_theta_zero_location("N") ## Set 0 degrees to the top of the plot
 ax.set_theta_direction(-1) ## Switch to clockwise
 
-fig
+plt.gcf()
 
 # ## Rumtime information
 
