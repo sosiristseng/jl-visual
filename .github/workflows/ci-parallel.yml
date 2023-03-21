@@ -10,12 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 env:
   JULIA_DEPOT_PATH: '~/.julia'
   JULIA_NUM_THREADS: 'auto'
   JULIA_CACHE: '1'
-  TIMEOUT: 600
-  JOBS: '2'
   PYTHON_VER: '3.11'
   GKSwstype: 100
 
@@ -67,11 +68,6 @@ jobs:
         run: julia --color=yes --project=@. literate.jl
       - name: Build website
         run: jupyter-book build docs/
-      - name: Upload pages artifact
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: docs/_build/html
       - name: Deploy Website
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v3
