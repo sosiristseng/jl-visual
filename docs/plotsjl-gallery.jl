@@ -595,8 +595,9 @@ plot(p1, p2, p3, p4)
 using Plots
 
 x = y = -10:10
+f = (x , y) -> x^2 + y^2
 
-surface(x, y, (x,y) -> x^2 + y^2)
+surface(x, y, f)
 
 # surface style
 
@@ -657,7 +658,7 @@ plt = plot3d(
     marker = 2,
 )
 
-# build an animated gif by pushing new points to the plot
+# pushing new points to the plot
 anim = @animate for i=1:1500
     step!(attractor)
     push!(plt, attractor.x, attractor.y, attractor.z)
@@ -665,11 +666,12 @@ end
 
 mp4(anim, fps = 15)
 
-# ## Rumtime information
+# ## Runtime information
 
 import Pkg
 Pkg.status()
 
 #---
+
 import InteractiveUtils
 InteractiveUtils.versioninfo()
