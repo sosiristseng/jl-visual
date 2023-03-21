@@ -34,7 +34,7 @@ jobs:
           python-version: ${{ env.PYTHON_VER }}
       - name: Install Python dependencies
         run: |
-          pip install -U jupyter-book nbconvert
+          pip install -U jupyter-book
           pip install -r requirements.txt
       - name: Read Julia version
         uses: SebRollen/toml-action@v1.0.2
@@ -61,17 +61,9 @@ jobs:
           PYTHON: ${{ steps.python.outputs.python-path }}
         run: |
           julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()'
-          julia --color=yes --project="" -e 'import Pkg; Pkg.add("IJulia"); using IJulia; installkernel("Julia", "--project=@.")'
+          julia --color=yes --project="" -e 'import Pkg; Pkg.add("Literate")'
       - name: Build notebooks
-        run: >
-          parallel --joblog /tmp/log -j${{ env.JOBS }}
-          jupyter nbconvert --to notebook
-          --ExecutePreprocessor.timeout=${{ env.TIMEOUT }}
-          --ExecutePreprocessor.kernel_name=julia-$(julia -e 'print(VERSION.major,".",VERSION.minor)')
-          --execute --inplace
-          {} ::: docs/*.ipynb
-      - name: Display execution stats
-        run: cat /tmp/log
+        run: julia --color=yes --project=@. literate.jl
       - name: Build website
         run: jupyter-book build docs/
       - name: Upload pages artifact
@@ -79,6 +71,22 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: docs/_build/html
+      - name: Deploy Website
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          publish_branch: gh-pages
+          force_orphan: true
+      - name: Deploy Notebooks
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: out
+          exclude_assets: '.github,docs/_build'
+          force_orphan: true
 
   # Deployment job
   deploy:
