@@ -1,4 +1,4 @@
-name: Build Jupyter Notebooks
+name: Jupyter Book Website
 
 on:
   push:
@@ -26,9 +26,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
       - name: Setup Python ${{ env.PYTHON_VER }}
         uses: actions/setup-python@v4
         id: python
@@ -81,6 +78,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
           publish_branch: out
           exclude_assets: '.github,docs/_build'
           force_orphan: true
