@@ -11,7 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  packages: write
   contents: write
+  pull-requests: write
 
 env:
   JULIA_DEPOT_PATH: '~/.julia'
@@ -19,6 +21,7 @@ env:
   JULIA_CACHE: '1'
   PYTHON_VER: '3.11'
   GKSwstype: 100
+  IMAGE_NAME: ghcr.io/${{ github.repository }}:binder
 
 jobs:
   jupyter-book:
@@ -63,6 +66,15 @@ jobs:
           julia --color=yes --project="" -e 'import Pkg; Pkg.add("Literate")'
       - name: Build notebooks
         run: julia --color=yes --project=@. literate.jl
+      - name: Deploy Notebooks
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: out
+          exclude_assets: '.github,.binder'
+          force_orphan: true
       - name: Build website
         run: jupyter-book build docs/
       - name: Deploy Website
@@ -73,12 +85,43 @@ jobs:
           publish_dir: ./docs/_build/html
           publish_branch: gh-pages
           force_orphan: true
-      - name: Deploy Notebooks
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
-          publish_branch: out
-          exclude_assets: '.github,docs/_build'
-          force_orphan: true
+
+  binder:
+    runs-on: ubuntu-latest
+    needs: jupyter-book
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Remove binder folder if present
+      run: rm -rf .binder/ || true
+    - name: Setup Python ${{ env.PYTHON_VER }}
+      uses: actions/setup-python@v4
+      id: python
+      with:
+        python-version: ${{ env.PYTHON_VER }}
+    - name: Install repo2docker
+      run: python3 -m pip install https://github.com/jupyterhub/repo2docker/archive/main.zip
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build binder image with repo2docker
+      run: >
+        jupyter-repo2docker --ref out
+        --image-name ${{ env.IMAGE_NAME }}
+        --cache-from ${{ env.IMAGE_NAME }}
+        --push --no-run --user-id 1000 --user-name jovyan
+        .
+    - name: Add back binder folder and Dockerfile
+      run: |
+        mkdir -p .binder
+        echo "FROM ${{ env.IMAGE_NAME }}" >> .binder/Dockerfile
+    - name: Create Pull Request if binder Dockerfile has changed
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        title: Binder Dockerfile
+        add-paths: .binder/Dockerfile
+        branch: binder-dockerfile
