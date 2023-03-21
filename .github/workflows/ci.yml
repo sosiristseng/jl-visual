@@ -73,7 +73,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: out
-          exclude_assets: '.github,.binder'
           force_orphan: true
       - name: Build website
         run: jupyter-book build docs/
@@ -90,8 +89,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: jupyter-book
     steps:
-    - name: Checkout Code
+    - name: Checkout
       uses: actions/checkout@v3
+      with:
+        ref: out
     - name: Remove binder folder if present
       run: rm -rf .binder/ || true
     - name: Setup Python ${{ env.PYTHON_VER }}
@@ -118,10 +119,8 @@ jobs:
       run: |
         mkdir -p .binder
         echo "FROM ${{ env.IMAGE_NAME }}" >> .binder/Dockerfile
-    - name: Create Pull Request if binder Dockerfile has changed
-      id: cpr
-      uses: peter-evans/create-pull-request@v4
-      with:
-        title: Binder Dockerfile
-        add-paths: .binder/Dockerfile
-        branch: binder-dockerfile
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .binder/Dockerfile
+        git commit -m "Generate binder dockerfile"
+        git push
