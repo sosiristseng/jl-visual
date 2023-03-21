@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim
+FROM python:3.11.2-slim as base
 
 # Julia
 ENV JULIA_CI true
