@@ -17,6 +17,7 @@ env:
   TIMEOUT: 600
   JOBS: '2'
   PYTHON_VER: '3.11'
+  GKSwstype: 100
 
 jobs:
   jupyter-book:
