@@ -1,27 +1,26 @@
-# # PyPlot.jl gallery
+# # PythonPlot.jl gallery
 
 # ## 3D surface plot
 
-import PyPlot as plt
+import PythonPlot as plt
+plt.using3D()
 
-## Data
-us = range(0.0,stop=2pi,length=300)
-vs = range(0.0,stop=pi,length=300)
+r = range(0, 1.25, 50)
+p = range(0, 2π, 50)
+rr = [_r for _p in p, _r in r]
+pp = [_p for _p in p, _r in r]
+Z = @. (rr^2-1)^2
+xx = @. rr * cos(pp)
+yy = @. rr * sin(pp)
 
-x = [cos(u) * sin(v) for u in us, v in vs]
-y = [sin(u) * sin(v) for u in us, v in vs]
-z = [cos(v) for u in us, v in vs]
-
-colors = rand(length(us),length(vs),3)
-
-## Plot
-plt.surf(x,y,z,facecolors=colors)
+plt.figure()
+plt.plot_surface(xx, yy, Z, cmap=plt.cm.YlGnBu_r)
 plt.gcf()
 
 # ## Annotations
 
 using Dates, LaTeXStrings
-import PyPlot as plt
+import PythonPlot as plt
 
 ## Data: Generate an hour of data at 10Hz.
 
@@ -42,7 +41,7 @@ x3 = collect(minimum(x):dx/20:maximum(x))
 
 y3 = 10rand(21) .- 3
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(8, 8))
 
 ## Plot a basic line
 ax.plot_date(x,y, linestyle="-", marker="None", label="Test Plot")
@@ -92,7 +91,7 @@ ax.annotate("Look, data!",
     xy=[x[convert(Int64,floor(length(x)/4.1))];y[convert(Int64,floor(length(y)/4.1))]],
     xytext=[x[convert(Int64,floor(length(x)/4.1))]+0.1dx;y[convert(Int64,floor(length(y)/4.1))]+0.1dy],
     xycoords="data",
-    arrowprops=Dict("facecolor"=>"black")) # Julia dictionary objects are automatically converted to Python object when they pass into a PyPlot function
+    arrowprops=Dict("facecolor"=>"black")) # Julia dictionary objects are automatically converted to Python object when they pass into a PythonPlot function
 ax.annotate("Figure Top Right",
     xy=[1;1],
     xycoords="figure fraction",
@@ -111,19 +110,19 @@ ax.annotate(L"$\int x = \frac{x^2}{2} + C$",
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right")
 
-plt.gcf()
+fig
 
 # ## Axis placement
 
-import PyPlot as plt
+import PythonPlot as plt
 
 ## Data
 x = 0:pi/50:2pi
 y = sin.(x)
 
-fig, axs = plt.subplots(2, 1, figsize = (10, 10))
+fig, axs = plt.subplots(2, 1)
 
-ax = axs[1]
+ax = axs[0]
 
 ax.plot(x,y)
 ax.axis("tight")
@@ -134,7 +133,7 @@ ax.spines["bottom"].set_position("center") # Most the bottom axis to the center
 ax.xaxis.set_ticks_position("bottom") # Set the x-ticks to only the bottom
 ax.yaxis.set_ticks_position("left") # Set the y-ticks to only the left
 
-ax = axs[2]
+ax = axs[1]
 
 ax.plot(x,y)
 ax.axis("tight")
@@ -147,18 +146,18 @@ ax.spines["bottom"].set_position(("axes",-0.05)) # Offset the bottom scale from 
 ax.set_xlabel("X Axis")
 ax.set_ylabel("Y Axis")
 
-plt.gcf()
+fig
 
 # ## Bar plot
 
-import PyPlot as plt
+import PythonPlot as plt
 
 x = [1:1:50;]
 y = 100*rand(50)
 
-fig, axs = plt.subplots(2, 1, figsize=(10,10))
+fig, axs = plt.subplots(2, 1, figsize=(8,8))
 
-ax = axs[1]
+ax = axs[0]
 
 ax.bar(x,y,color="#0f87bf",align="center",alpha=0.4)
 ax.axis("tight")
@@ -167,7 +166,7 @@ ax.set_title("Vertical Bar Plot")
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
 
-ax = axs[2]
+ax = axs[1]
 ax.barh(x,y,color="#0f87bf",align="center",alpha=0.4)
 ax.axis("tight")
 ax.set_title("Horizontal Bar Plot")
@@ -177,12 +176,12 @@ ax.set_ylabel("Y")
 
 fig.suptitle("Bar Plot Examples")
 
-plt.gcf()
+fig
 
 # ## Broken axis subplots
 
-using PyCall
-import PyPlot as plt
+using PythonCall
+import PythonPlot as plt
 
 axes_grid1 = pyimport("mpl_toolkits.axes_grid1")
 
@@ -190,9 +189,9 @@ x = rand(100)
 y = rand(100)
 y2 = rand(100).+10
 
-fig, axes = plt.subplots(2, 1, figsize=(10,10), sharex=true)
+fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=true)
 
-ax = axes[1]
+ax = axes[0]
 divider = axes_grid1.make_axes_locatable(ax)
 ax2 = divider.new_vertical(size="100%", pad=0.1)
 fig.add_axes(ax2)
@@ -208,10 +207,10 @@ ax2.set_ylim(10, 11)
 ax2.tick_params(bottom="off", labelbottom="off")
 ax2.spines["bottom"].set_visible(false)
 
-plt.gcf()
+fig
 
-## Add Line Break Markings
-## From https://matplotlib.org/examples/pylab_examples/broken_axis.html
+# Add Line Break Markings
+# From https://matplotlib.org/examples/pylab_examples/broken_axis.html
 
 ## Upper Line Break Markings
 d = 0.015  # how big to make the diagonal lines in axes coordinates
@@ -222,14 +221,15 @@ ax2.plot((1 - d, 1 + d), (-d, +d), transform=ax2.transAxes, color="k", clip_on=f
 ax.plot((-d, +d), (1 - d, 1 + d), transform=ax.transAxes, color="k", clip_on=false,linewidth=0.8)  ## Left diagonal
 ax.plot((1 - d, 1 + d), (1 - d, 1 + d), transform=ax.transAxes, color="k", clip_on=false,linewidth=0.8)  ## Right diagonal
 
-axes[2].scatter(x, y)
+axes[1].scatter(x, y)
 
-plt.gcf()
+fig
 
 # ## Custom Time
 
-using Dates, PyCall
-import PyPlot as plt
+using Dates
+using PythonCall
+import PythonPlot as plt
 matplotlib = pyimport("matplotlib")
 
 ## Data
@@ -250,7 +250,7 @@ minorlocator = matplotlib.dates.HourLocator(byhour=(8, 16))
 
 ## Plot
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(8, 8))
 ax.plot_date(time2,y,linestyle="-",marker="None",label="test")
 ax.axis("tight")
 ax.set_title("Random Data Against Time\n" * timespan)
@@ -265,13 +265,13 @@ ax.xaxis.set_major_locator(majorlocator)
 ax.xaxis.set_minor_locator(minorlocator)
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right")
-plt.tight_layout()
-plt.gcf()
+fig.set_tight_layout(true)
+fig
 
 # ## Error bar
 
 using Dates
-import PyPlot as plt
+import PythonPlot as plt
 
 x = collect(DateTime(2013,10,4):Dates.Day(1):DateTime(2013,10,9))
 y = [0.9;0.75;0.5;0.4;0.35;0.3]
@@ -280,7 +280,7 @@ uppererror = [0.05 0.05 0.05 0.03 0.15 0.05;]
 lowererror = [0.15 0.2 0.05 0.1 0.05 0.05;]
 errs = [lowererror; uppererror]
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(8, 8))
 ax.plot_date(x,y,linestyle="-",label="Base Plot") ## Basic line plot
 ax.errorbar(x,y,yerr=errs,fmt="o") ## Plot irregular error bars
 ax.axis("tight")
@@ -291,15 +291,15 @@ ax.set_ylabel("Some Data")
 ax.grid("on")
 
 fig.autofmt_xdate(bottom=0.2,rotation=30,ha="right") ## Autoformat the time format and rotate the labels so they don't overlap
-plt.gcf()
+fig
 
 # ## Histogram
 
-import PyPlot as plt
+import PythonPlot as plt
 
 x = randn(1000)
 nbins = 50
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots()
 
 ax.hist(x,nbins)
 
@@ -308,41 +308,18 @@ ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.set_title("Histogram")
 
-plt.gcf()
-
-# ## Line collections
-
-using PyCall
-import PyPlot as plt
-matplotlib = pyimport("matplotlib")
-
-lines = Any[collect(zip([1.,3.,5.,0.],[2.,4.,.06,0.]))]
-push!(lines,collect(zip([3.,4],[5.,6])))
-push!(lines,collect(zip([8.,2],[2.,4])))
-
-## Colors
-## Line segments will be plotted with the following order of colors and will
-## cycle back to the beginning of the array when it has gone through all of them
-c = Vector[[1,0,0],[0,1,0],[0,0,1]]
-
-## Assemble everything into a LineCollection
-line_segments = matplotlib.collections.LineCollection(lines,colors=c)
-
-fig, ax = plt.subplots(figsize=(10,10))
-ax.add_collection(line_segments)
-ax.axis("image") ## Tight axis and 1:1 aspect ratio
-plt.gcf()
+fig
 
 # ## Major and minor ticks
 
-using PyCall
-import PyPlot as plt
+using PythonCall
+import PythonPlot as plt
 matplotlib = pyimport("matplotlib")
 
 x = collect(0.0:0.01:100.0)
 y = @. sin(0.1pi*x) * exp(-0.01x)
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(8,8))
 
 ax.plot(x,y)
 ax.set_xlabel("X Axis")
@@ -368,12 +345,12 @@ ax.yaxis.set_minor_locator(my) ## Set interval of minor ticks
 ax.xaxis.set_tick_params(which="major",length=10,width=2,labelsize=16)
 ax.xaxis.set_tick_params(which="minor",length=5,width=2)
 
-plt.gcf()
+fig
 
 # ## Multiple axis
 
 using Random
-import PyPlot as plt
+import PythonPlot as plt
 Random.seed!(2021)
 
 n = 15
@@ -382,7 +359,7 @@ y1 = 10rand(n,1) .- 2
 y2 = 1000rand(n,1)
 y3 = 30rand(n,1) .- 15
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots()
 
 ax.plot(x,y1,linestyle="-",marker="o",label="First")
 ax.set_title("Multi-axis Plot")
@@ -419,11 +396,11 @@ ax3.patch.set_visible(false) ## Make the patch (background) invisible so it does
 ax3.spines["top"].set_visible(false) ## Hide the top edge of the axis
 ax3.spines["bottom"].set_visible(false) ## Hide the bottom edge of the axis
 
-plt.gcf()
+fig
 
 # ### Sharing the Legend Box in Twin Axes
 
-import PyPlot as plt
+import PythonPlot as plt
 
 x1 = 1:10
 fig, ax1 = plt.subplots()
@@ -431,11 +408,11 @@ l1 = ax1.plot(x1, x1, "r-")
 ax2 = ax1.twinx()
 l2 = ax2.plot(x1, exp.(x1), "g-")
 ax1.legend([first(l1), first(l2)], ["x", "exp(x)"])
-plt.gcf()
+fig
 
 # ## Pie Chart
 
-import PyPlot as plt
+import PythonPlot as plt
 
 labels = ["Lager","Pilsner","Stout","IPA"]
 colors = ["yellowgreen","gold","lightskyblue","lightcoral"]
@@ -447,7 +424,7 @@ sizes = [15, 30, 45, 10]
 
 font = Dict("fontname"=>"Sans","weight"=>"semibold")
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots()
 ax.pie(sizes,
         labels=labels,
         shadow=true,
@@ -458,46 +435,46 @@ ax.pie(sizes,
         textprops=font)
 ax.axis("equal")
 ax.set_title("Beer")
-plt.gcf()
+fig
 
 # ## Quiver plots
 
-import PyPlot as plt
+import PythonPlot as plt
 R = -10:1:9
 X = [R;]'
 Y = [R;]
 U = repeat([R;]',length(X))
 V = repeat([R;],1,length(Y))
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(8,8))
 q = ax.quiver(X,Y,U,V)
 ax.quiverkey(q,X=0.07,Y = 0.05, U = 10,coordinates="figure", label="Quiver key, length = 10",labelpos = "E")
 ax.set_title("Quiver Plot Example")
-plt.gcf()
+fig
 
 # ## Scatter Plot
 
 using Random
-import PyPlot as plt
+import PythonPlot as plt
 Random.seed!(2021)
 
 x = 100*rand(50)
 y = 100*rand(50)
 areas = 800*rand(50)
 
-fig, ax = plt.subplots(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(8,8))
 ax.scatter(x,y,s=areas,alpha=0.5)
 ax.set_title("Scatter Plot")
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.grid("on")
-plt.gcf()
+fig
 
 # ## Subplots
 
-import PyPlot as plt
+import PythonPlot as plt
 
-fig = plt.figure("pyplot_subplot_mixed",figsize=(10,10)) ## Create a new blank figure
+fig = plt.figure("PythonPlot_subplot_mixed",figsize=(8,8)) ## Create a new blank figure
 ##fig.set_figheight(7) # Doesn't work
 ##fig.set_figwidth(3) # Doesn't work
 plt.subplot(221) ## Create the 1st axis of a 2x2 arrax of axes
@@ -515,12 +492,12 @@ plt.ylabel("This is a y axis")
 plt.title("224")
 fig.suptitle("2x2 Subplot")
 
-plt.gcf()
+fig
 
 #----
 
 ##  Shared Axis
-fig = plt.figure("pyplot_subplot_touching",figsize=(10,10))
+fig = plt.figure("PythonPlot_subplot_touching",figsize=(8,8))
 plt.subplots_adjust(hspace=0.0) ## Set the vertical spacing between axes
 plt.subplot(311) ## Create the 1st axis of a 3x1 array of axes
 ax1 = plt.gca()
@@ -547,12 +524,12 @@ plt.yticks(0.1:0.2:0.9)
 plt.ylim(0.0,1.0)
 plt.suptitle("3x1 Shared Axis")
 
-plt.gcf()
-
+fig
 # ## Surface plot
 
-using Distributions, LinearAlgebra
-import PyPlot as plt
+using Distributions
+using LinearAlgebra
+import PythonPlot as plt
 plt.using3D() ## Needed to create a 3D subplot
 
 n = 100
@@ -570,7 +547,7 @@ for i in 1:n
     end
 end
 
-fig = plt.figure("pyplot_surfaceplot",figsize=(10,10))
+fig = plt.figure("PythonPlot_surfaceplot",figsize=(8,8))
 
 ax = fig.add_subplot(2,1,1,projection="3d")
 ax.plot_surface(xgrid, ygrid, z, rstride=2,edgecolors="k", cstride=2, cmap=plt.ColorMap("gray"), alpha=0.8, linewidth=0.25)
@@ -586,17 +563,17 @@ ax.set_ylabel("Y")
 ax.set_title("Contour Plot")
 fig.tight_layout()
 
-plt.gcf()
+fig
 
 # ## Windrose bar and line plots
 
-import PyPlot as plt
+import PythonPlot as plt
 theta = collect(0:2pi/30:2pi)
 r = rand(length(theta))
 width = 2pi/length(theta)
 
 ##  Windrose Line Plot
-fig = plt.figure(figsize=(10,10)) ## Create a new figure
+fig = plt.figure(figsize=(8,8)) ## Create a new figure
 ax = plt.axes(polar="true") ## Create a polar axis
 
 ax.set_title("Wind Rose - Line")
@@ -608,11 +585,11 @@ ax.set_thetagrids(collect(0:dtheta:360-dtheta)) ## Show grid lines from 0 to 360
 ax.set_theta_zero_location("N") ## Set 0 degrees to the top of the plot
 ax.set_theta_direction(-1) ## Switch to clockwise
 
-plt.gcf()
+fig
 
 #-----
 
-fig = plt.figure("pyplot_windrose_barplot",figsize=(10,10)) ## Create a new figure
+fig = plt.figure("PythonPlot_windrose_barplot",figsize=(8,8)) ## Create a new figure
 ax = plt.axes(polar="true") ## Create a polar axis
 ax.set_title("Wind Rose - Bar")
 ax.bar(theta,r,width=width) ## Bar plot
@@ -622,7 +599,7 @@ ax.set_thetagrids(collect(0:dtheta:360-dtheta)) ## Show grid lines from 0 to 360
 ax.set_theta_zero_location("N") ## Set 0 degrees to the top of the plot
 ax.set_theta_direction(-1) ## Switch to clockwise
 
-plt.gcf()
+fig
 
 # ## Rumtime information
 
