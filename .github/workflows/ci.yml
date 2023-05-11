@@ -1,4 +1,4 @@
-name: CI with dynamic parallel matrix
+name: Build notebooks and publish
 
 on:
   workflow_dispatch:
@@ -12,25 +12,24 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  JULIA_CACHE: '2'
-  TIMEOUT: '-1'
-  EXTRA_ARGS: ''
   PYTHON_VER: '3.11'
 
 jobs:
-  setup:
+  execute:
+    name: Execute notebooks
     runs-on: ubuntu-latest
+    env:
+      NPROC: '2'       # Number of Julia processes to run the notebooks
+      JULIA_CACHE: '1' # Set this env var zero to disable caching
     container:
       image: python:3.11.3-slim
       env:
-        # Let PythonCall use built-in python
-        JULIA_CONDAPKG_BACKEND: "Null"
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+        GKSwstype: 100
+        JULIA_NUM_THREADS: 'auto'
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install Python dependencies
+      - name: Install Python dep
         run: pip install -r requirements.txt
       - name: Read Julia version
         id: read_toml
@@ -51,87 +50,39 @@ jobs:
             ${{ runner.os }}-julia-${{ env.JULIA_CACHE }}-
       - name: Install Julia dependencies
         run: |
-          julia --color=yes --project="" -e 'import Pkg; Pkg.Registry.update(); Pkg.add("IJulia"); Pkg.build("IJulia")'
-          julia --color=yes --project=@. -e 'import Pkg;  Pkg.instantiate(); Pkg.resolve(); Pkg.precompile(); Pkg.gc()'
+          JULIA_PROJECT="" julia --color=yes -e 'import Pkg; Pkg.Registry.update(); Pkg.add(["Literate", "PrettyTables"])'
+          JULIA_PROJECT=@. julia --color=yes -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile(); Pkg.gc()'
       - name: Save Julia dependencies
         uses: actions/cache/save@v3
         if: ${{ steps.restore-cache.outputs.cache-hit != 'true' && env.JULIA_CACHE != '0' }}
         with:
           path: ~/.julia
           key: ${{ steps.restore-cache.outputs.cache-primary-key }}
-      - name: List notebooks as a JSON array
-        id: set-matrix
-        working-directory: docs
-        run: echo "matrix=$(python -c 'import glob, json; print(json.dumps(glob.glob("**/*.ipynb", recursive=True)))')" >> $GITHUB_OUTPUT
-
-  execute:
-    needs: setup
-    strategy:
-      max-parallel: 20
-      fail-fast: false
-      matrix:
-        # Notebooks need to be executed
-        notebook: ${{ fromJSON(needs.setup.outputs.matrix) }}
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.11.3-slim
-      env:
-        # Let PythonCall use built-in python
-        JULIA_CONDAPKG_BACKEND: "Null"
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-      - name: Read Julia version
-        id: read_toml
-        run: |
-          echo "JULIA_VER=$(python read_toml.py)" | tee -a "$GITHUB_ENV"
-      - name: Setup Julia ${{ env.JULIA_VER }}
-        uses: julia-actions/setup-julia@v1
-        with:
-          version: ${{ env.JULIA_VER }}
-      - name: Restore Julia dependencies
-        id: restore-cache
-        uses: actions/cache/restore@v3
-        if: ${{ env.JULIA_CACHE != '0'}}
-        with:
-          path: ~/.julia
-          key: ${{ runner.os }}-julia-${{ env.JULIA_CACHE }}-${{ hashFiles('*.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-julia-${{ env.JULIA_CACHE }}-
-      - name: Install Julia kernel
-        run: |
-          julia --color=yes --project="" -e 'import Pkg; Pkg.build("IJulia"); Pkg.resolve(); Pkg.precompile()'
-      - name: Execute Notebook
-        run: >
-          jupyter nbconvert --to notebook --execute --inplace ${{ env.EXTRA_ARGS }}
-          --ExecutePreprocessor.timeout=${{ env.TIMEOUT }}
-          --ExecutePreprocessor.kernel_name="julia-$(julia -e 'print(VERSION.major, ".", VERSION.minor)')"
-          docs/${{ matrix.notebook }}
-      - name: Upload Notebook
+      - name: Build notebooks with ${{ env.NPROC }} processes
+        run: JULIA_PROJECT=@. julia --color=yes -p ${{ env.NPROC }} literate.jl
+      - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
           name: notebooks
-          path: docs*/${{ matrix.notebook }}  # keep folder structure
-          retention-days: 1
+          path: docs
 
   jupyter-book:
-    needs: execute
+    name: Jupyter Book
     runs-on: ubuntu-latest
-    # output success flag for CI
-    outputs:
-      success: ${{ steps.setoutput.outputs.success }}
+    needs: execute
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Download built notebooks
+      - name: Remove existing docs folder
+        run: rm -rf docs || true
+      - name: Download built notebooks to replace the original
         uses: actions/download-artifact@v3
         with:
           name: notebooks
-          path: out/
-      - name: Copy back built notebooks
-        run: cp --verbose -rf out/docs/* docs/
+          path: docs/
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: docs/
       - name: Setup Python ${{ env.PYTHON_VER }}
         uses: actions/setup-python@v4
         id: python
@@ -146,17 +97,18 @@ jobs:
         # the package installation will only be executed when the
         # requirements-files have changed.
       - name: Install Python dependencies
-        run: pip install -r .github/requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+        run: pip install -r .github/requirements.txt
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v3
       - name: Build website
-        run: jupyter-book build docs/
+        run: jupyter-book build docs
       - name: Upload artifact for GH pages
         uses: actions/upload-pages-artifact@v1
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
-          path: docs/_build/html/
-      - name: Set output flag
-        id: setoutput
-        run: echo "success=true" >> $GITHUB_OUTPUT
+          path: docs/_build/html
 
   binder:
     name: Build binder image
@@ -172,21 +124,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Remove existing binder dockerfile
-        run: |
-          rm -rf .binder || true
-      - name: Download built notebooks
-        uses: actions/download-artifact@v3
-        with:
-          name: notebooks
-          path: out/
-      - name: Copy back built notebooks
-        run: cp --verbose -rf out/docs/* docs/
       - name: Setup Python ${{ env.PYTHON_VER }}
         uses: actions/setup-python@v4
         id: python
         with:
           python-version: ${{ env.PYTHON_VER }}
+      - name: Remove existing binder dockerfile and docs folder
+        run: |
+          rm -rf .binder || true
+          rm -rf docs || true
+      - name: Download built notebooks to replace the original
+        uses: actions/download-artifact@v3
+        with:
+          name: notebooks
+          path: docs/
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: docs/
       - name: Install repo2docker
         run: |
           pip install -U pip setuptools wheel
@@ -219,26 +173,6 @@ jobs:
           branch: binderfile
           add-paths: |
             .binder/Dockerfile
-
-  # CI conclusion for GitHub status check
-  # https://brunoscheufler.com/blog/2022-04-09-the-required-github-status-check-that-wasnt
-  CI:
-    needs: jupyter-book
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      # pass step only when output of previous jupyter-book job is set
-      # in case at least one of the execution fails, jupyter-book is skipped
-      # and the output will not be set, which will then cause the ci job to fail
-      - run: |
-          passed="${{ needs.jupyter-book.outputs.success }}"
-          if [[ $passed == "true" ]]; then
-            echo "Tests passed"
-            exit 0
-          else
-            echo "Tests failed"
-            exit 1
-          fi
 
   deploy:
     name: Deploy to GitHub pages
