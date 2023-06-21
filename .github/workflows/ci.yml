@@ -13,13 +13,8 @@ concurrency:
 
 env:
   NPROC: '2'                      # Number of Julia processes to run the notebooks
-  JULIA_CACHE: '1'                # Set this '0' to disable caching
-  JULIA_CONDAPKG_BACKEND: 'Null'  # Use installed python for PythonCall.jl
-  GKSwstype: 100                  # Non-interactive plotting
-  JULIA_NUM_THREADS: 'auto'
-  JULIA_CPU_TARGET: 'generic'     # Prevent re-precompilation (https://github.com/JuliaLang/julia/issues/50102)
-  PY_VER: '3.11'
-
+  DFILE: '.github/Dockerfile'
+  IMAGE_NAME: 'app:test'
 
 jobs:
   CI:
@@ -27,56 +22,30 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup Python ${{ env.PY_VER }}
-        uses: actions/setup-python@v4
-        id: python
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and cache Docker container
+        uses: docker/build-push-action@v4
         with:
-          python-version: ${{ env.PY_VER }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v3.3.1
-        id: pycache
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('**/requirements.txt') }}
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt -r .github/requirements.txt
-        if: steps.pycache.outputs.cache-hit != 'true'
-      - name: Read Julia version
-        id: read_toml
-        uses: SebRollen/toml-action@v1.0.2
-        with:
-          file: 'Manifest.toml'
-          field: 'julia_version'
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v1
-        with:
-          version: ${{ steps.read_toml.outputs.value }}
-          show-versioninfo: 'true'
-      - name: Restore Julia dependencies
-        id: restore-cache
-        uses: actions/cache/restore@v3
-        if: ${{ env.JULIA_CACHE != '0'}}
-        with:
-          path: |
-            ~/.julia
-          key: ${{ runner.os }}-julia-${{ env.JULIA_CPU_TARGET }}-${{ env.JULIA_CACHE }}-${{ hashFiles('**/Manifest.toml') }}
-          # restore-keys: |
-          #   ${{ runner.os }}-julia-${{ env.JULIA_CPU_TARGET }}-${{ env.JULIA_CACHE }}-
-      - name: Install Julia dependencies
-        run: |
-          julia --project="" --color=yes -e 'import Pkg; Pkg.Registry.update(); Pkg.add(["Literate", "PrettyTables"])'
-          julia --project=@. --color=yes -e 'import Pkg; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile()'
-      - name: Save Julia dependencies
-        uses: actions/cache/save@v3
-        if: ${{ steps.restore-cache.outputs.cache-hit != 'true' && env.JULIA_CACHE != '0' }}
-        with:
-          path: |
-            ~/.julia
-          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+          context: .
+          file: ${{ env.DFILE }}
+          tags: ${{ env.IMAGE_NAME }}
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha
       - name: Build notebooks with ${{ env.NPROC }} processes
-        run: JULIA_PROJECT=@. julia --color=yes -p ${{ env.NPROC }} literate.jl
+        run: >
+          docker run
+          --workdir=/work -v ${{ github.workspace }}:/work
+          -e JULIA_PROJECT=@.
+          ${{ env.IMAGE_NAME }}
+          julia --color=yes -p ${{ env.NPROC }} literate.jl
       - name: Build website with Jupyter Book
-        run: jupyter-book build docs/
+        run: >
+          docker run
+          --workdir=/work -v ${{ github.workspace }}:/work
+          ${{ env.IMAGE_NAME }}
+          jupyter-book build docs/
       - name: Upload artifact for GH pages
         uses: actions/upload-pages-artifact@v1
         if: ${{ github.ref == 'refs/heads/main' }}
