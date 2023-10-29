@@ -1,6 +1,6 @@
 # Julia visualization example notebooks
 
-- [Summary in a discourse thread by Chris Rackauckas](https://discourse.julialang.org/t/comparison-of-plotting-packages/99860/2?u=wen-wei_tseng)
+- [Summary in a discourse thread by Chris Rackauckas](https://discourse.julialang.org/t/comparison-of-plotting-packages/99860/2)
 
 ## Packages
 
