@@ -1,16 +1,13 @@
 #===
 # PythonPlot.jl gallery
-
-## 3D surface plot
 ===#
 
 using Random
-Random.seed!(2021)
-
-#---
-
 import PythonPlot as plt
 plt.using3D()
+Random.seed!(2021)
+
+# ## 3D surface plot
 
 r = range(0, 1.25, 50)
 p = range(0, 2π, 50)
