@@ -12,6 +12,7 @@ https://docs.juliaplots.org/stable/attributes/
 ===#
 
 using Plots
+Plots.default(fmt=:png)
 using Random
 Random.seed!(2021)
 
