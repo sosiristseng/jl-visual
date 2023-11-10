@@ -18,6 +18,7 @@ env:
   JULIA_CONDAPKG_BACKEND: 'Current'
   JULIA_CI: 'true'
   GKSwstype: '100'
+  JULIA_CACHE_NUM: '1'
 
 jobs:
   CI:
@@ -51,9 +52,9 @@ jobs:
           ~/.julia/packages
           ~/.julia/environments
           ~/.julia/scratchspaces
-        key: ${{ runner.os }}-jill-${{ hashFiles('src/**','Project.toml', 'Manifest.toml')}}
+        key: ${{ runner.os }}-jill-${{ env.JULIA_CACHE_NUM }}-${{ hashFiles('src/**','Project.toml', 'Manifest.toml')}}
         restore-keys: |
-          ${{ runner.os }}-jill-
+          ${{ runner.os }}-jill-${{ env.JULIA_CACHE_NUM }}-
     - name: Install Julia deps
       shell: micromamba-shell {0}
       run: |
