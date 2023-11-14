@@ -1,5 +1,7 @@
 #===
 # PythonPlot.jl gallery
+
+From this awesome gist: https://gist.github.com/gizmaa/7214002
 ===#
 
 using Random
