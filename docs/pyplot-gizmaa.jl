@@ -7,19 +7,6 @@ import PythonPlot as plt
 plt.using3D()
 Random.seed!(2021)
 
-# ## 3D surface plot
-
-r = range(0, 1.25, 50)
-p = range(0, 2π, 50)
-rr = [_r for _p in p, _r in r]
-pp = [_p for _p in p, _r in r]
-Z = @. (rr^2-1)^2
-xx = @. rr * cos(pp)
-yy = @. rr * sin(pp)
-
-plt.plot_surface(xx, yy, Z, cmap=plt.cm.YlGnBu_r)
-plt.gcf()
-
 # ## Annotations
 
 using Dates, LaTeXStrings
