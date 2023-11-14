@@ -17,7 +17,6 @@ Z = @. (rr^2-1)^2
 xx = @. rr * cos(pp)
 yy = @. rr * sin(pp)
 
-plt.figure()
 plt.plot_surface(xx, yy, Z, cmap=plt.cm.YlGnBu_r)
 plt.gcf()
 
