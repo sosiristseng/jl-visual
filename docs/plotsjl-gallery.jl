@@ -573,7 +573,9 @@ plt = plot3d(
     zlim = (0, 60),
     title = "Lorenz Attractor",
     marker = 2,
-) |> PNG
+)
+
+plt |> PNG
 
 # pushing new points to the plot
 anim = @animate for i=1:1500
