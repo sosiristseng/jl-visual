@@ -12,9 +12,10 @@ https://docs.juliaplots.org/stable/attributes/
 ===#
 
 using Plots
-Plots.default(fmt=:png)
 using Random
 Random.seed!(2021)
+
+PNG(fig) = display("image/png", fig)  ## For Literate.jl output
 
 # ### Ticks size and properties
 
@@ -22,7 +23,7 @@ plot(sin, 0, 2π;
     xticks=0:0.5:2π,
     xrotation=60,
     xtickfontsize=25,
-    bottom_margin=15Plots.mm)
+    bottom_margin=15Plots.mm) |> PNG
 
 #---
 
@@ -31,43 +32,42 @@ plot(sin, 0, 2π;
     ytick=-1:0.2:1,
     xrotation=60,
     yrotation=90,
-)
+) |> PNG
 
 # ### No axis
 # `axis=false`
 
-plot(sin, 0, 2π, axis=false)
+plot(sin, 0, 2π, axis=false) |> PNG
 
 # ### Log scale for axes
 # `xscale=:log10`, `yscale=:log10`
 
-plot(exp, -5, 5, yscale=:log10, title="semilogy", legend=nothing)
+plot(exp, -5, 5, yscale=:log10, title="semilogy", legend=nothing) |> PNG
 #---
-plot(log, 1e-5, 10, xscale=:log10, title="semilogx", legend=nothing)
+plot(log, 1e-5, 10, xscale=:log10, title="semilogx", legend=nothing) |> PNG
 #---
-plot(x->x^1.7, 1e-3, 3, scale=:log10, title="log-log", legend=nothing)
+plot(x->x^1.7, 1e-3, 3, scale=:log10, title="log-log", legend=nothing) |> PNG
 
 
 # ### Axis range
 # `xlims` and `ylims`
 
-plot(sin, 0, 2π, xlims=(-10, 10), ylims=(-2,2))
+plot(sin, 0, 2π, xlims=(-10, 10), ylims=(-2,2)) |> PNG
 
 # ### Scietific notation
 # `yformatter=:scientific`
 
-plot(exp, 0, 10, yformatter=:scientific)
+plot(exp, 0, 10, yformatter=:scientific) |> PNG
 
 # ### Flip Axis
 # `xflip=true` and/or `yflip=true`
 
-plot(identity, 0:0.01:2π, proj=:polar, xflip=true, yflip=true)
+plot(identity, 0:0.01:2π, proj=:polar, xflip=true, yflip=true) |> PNG
 
 # ### Aspect ratio
 # `aspect_ratio=:equal` or `aspect_ratio=<number>`
 
-s = bitrand(10, 10)
-heatmap(s, aspect_ratio=:equal, c=:blues, colorbar=false)
+heatmap(bitrand(10, 10), aspect_ratio=:equal, c=:blues, colorbar=false) |> PNG
 
 # ### Fonts
 # LaTeX fonts are supported by the `LaTeXStrings.jl` package.
@@ -99,7 +99,7 @@ plot(sin, 0, 2π,
     bottom_margin=5Plots.mm,
     left_margin=10Plots.mm,
     top_margin=15Plots.mm
-)
+) |> PNG
 
 #---
 
@@ -107,7 +107,7 @@ fib(x) = (((1+sqrt(5))/2)^x - ((1-sqrt(5))/2)^x)/sqrt(5)
 
 ann = L"F_n = \frac{1}{\sqrt{5}} \left[\left( \frac{1+\sqrt{5}}{2} \right)^n - \left( \frac{1-\sqrt{5}}{2} \right)^n \right]"
 
-plot(fib, 1:12, marker=:circle, xlabel=L"n", ylabel=L"F_n", annotation=(5, 100, ann))
+plot(fib, 1:12, marker=:circle, xlabel=L"n", ylabel=L"F_n", annotation=(5, 100, ann)) |> PNG
 
 # ## Bar plots
 
@@ -125,7 +125,7 @@ ticklabel = string.(collect('A':'L'))
 # Requires the `StatsPlots.jl` package.
 # `groupedbar(data, bar_position = :dodge)`
 
-groupedbar([measles mumps chickenPox], bar_position = :dodge, bar_width=0.7, xticks=(1:12, ticklabel), label=["measles" "mumps" "chickenPox"])
+groupedbar([measles mumps chickenPox], bar_position = :dodge, bar_width=0.7, xticks=(1:12, ticklabel), label=["measles" "mumps" "chickenPox"]) |> PNG
 
 # ### Stacked vertical bar plots
 # Requires `StatsPlots` package.
@@ -135,12 +135,12 @@ groupedbar([measles mumps chickenPox],
         bar_position = :stack,
         bar_width=0.7,
         xticks=(1:12, ticklabel),
-        label=["measles" "mumps" "chickenPox"])
+        label=["measles" "mumps" "chickenPox"]) |> PNG
 
 # ### Horizontal Bar Plot
 # `bar(data, orientation=:h)`
 
-bar(1:12, orientation=:h, yticks=(1:12, ticklabel), yflip=true)
+bar(1:12, orientation=:h, yticks=(1:12, ticklabel), yflip=true) |> PNG
 
 # ### Categorical Histogram Plot
 
@@ -148,7 +148,7 @@ status = ["Poor", "Fair", "Good", "Excellent"]
 data = sample(status, Weights([1,1,2,2]), 100)
 datamap = countmap(data)
 
-bar((x -> datamap[x]).(status), xticks=(1:4, status), legend=nothing)
+bar((x -> datamap[x]).(status), xticks=(1:4, status), legend=nothing) |> PNG
 
 # ## Histogram
 # `histogram(data, bins=N)`
@@ -161,7 +161,7 @@ z = randn(1000)
 
 histogram(x, bins=20, alpha=0.4, label="A")
 histogram!(y, bins=20, alpha=0.4, label="B")
-histogram!(z, bins=20, alpha=0.4, label="C")
+histogram!(z, bins=20, alpha=0.4, label="C") |> PNG
 
 # ## Box plots
 
@@ -171,12 +171,12 @@ using Statistics
 
 n = 30
 science = rand(1:10, n)
-boxplot(science, label="science")
+boxplot(science, label="science") |> PNG
 
 #---
 
 english = rand(1:10, n)
-boxplot([science english], label=["science" "english"])
+boxplot([science english], label=["science" "english"]) |> PNG
 
 # ## Contour Plots
 # ### Over a function
@@ -188,7 +188,7 @@ xs = range(0, stop=2, length=50)
 ys = range(0, stop=2, length=50)
 f = (x , y) -> x^2 + y^2
 
-contour(xs, ys, f)
+contour(xs, ys, f) |> PNG
 
 # ### Nullclines
 # [Nullclines](https://en.wikipedia.org/wiki/Nullcline) (zero-growth isoclines) are curves where the derivative of one variable is zero. Nullclines are used to analyze evolution and stability of ODE systems.
@@ -201,7 +201,7 @@ dy = (x, y) -> -y + 0.8x*y
 myrange = -1:0.01:4
 
 contour(myrange, myrange, dx, levels=[0], color=:red, legend=false)
-contour!(myrange, myrange, dy, levels=[0], color=:blue, legend=false)
+contour!(myrange, myrange, dy, levels=[0], color=:blue, legend=false) |> PNG
 
 # ### Contour plot over an array
 # `contour(x1d, y1d, xy2d)`
@@ -209,13 +209,13 @@ contour!(myrange, myrange, dy, levels=[0], color=:blue, legend=false)
 ## Notice xs is transposed
 ## This makes zz a 2D matrix
 zz = f.(xs', ys)
-contour(xs, ys, zz)
+contour(xs, ys, zz) |> PNG
 
 # ### Filled Contour Plots
 # + `contour(xs, ys, f, fill=true)`
 # + `contourf(xs, ys, f)`
 
-contour(0:0.01:5, 0:0.01:5, (x, y) -> sin(3x) * cos(x+y), xlabel="x", ylabel="y", fill=true)
+contour(0:0.01:5, 0:0.01:5, (x, y) -> sin(3x) * cos(x+y), xlabel="x", ylabel="y", fill=true) |> PNG
 
 # ## Datetime plot
 # - Use `Dates` package and `Data` data type
@@ -237,7 +237,7 @@ plot(x, position,
      xticks=ticks,
      xrotation=45,
      bottom_margin=10Plots.mm,
-     left_margin=5Plots.mm)
+     left_margin=5Plots.mm) |> PNG
 
 
 # ## Error bar
@@ -253,7 +253,7 @@ y = f.(x) + randn(n)
 plot(x, y,
     xerr=0.1 * rand(n),
     yerr=rand(n),
-	legend=nothing)
+	legend=nothing) |> PNG
 
 # ## Heatmap
 # `heatmap(data)`
@@ -265,7 +265,7 @@ xlabel = string.(collect('A':'E'))
 ylabel = string.(collect('a':'e'))
 heatmap(a, xticks=(1:5, xlabel),
            yticks=(1:5, ylabel),
-           aspect_ratio=:equal)
+           aspect_ratio=:equal) |> PNG
 
 fontsize = 15
 nrow, ncol = size(a)
@@ -274,7 +274,7 @@ nrow, ncol = size(a)
 ann = [(i,j, text(round(a[i,j], digits=2), fontsize, :white, :center))
             for i in 1:nrow for j in 1:ncol]
 
-annotate!(ann, linecolor=:white)
+annotate!(ann, linecolor=:white) |> PNG
 
 #===
 
@@ -301,7 +301,7 @@ plot!(x, y2, color="red", line=:dash)
 title!("Trigonometric functions")
 xlabel!("angle")
 ylabel!("sin(x) and cos(x)")
-plot!(xlims=(0,2pi), ylims=(-2, 2), size=(600, 600))
+plot!(xlims=(0,2pi), ylims=(-2, 2), size=(600, 600)) |> PNG
 
 #---
 
@@ -311,7 +311,7 @@ plot!(x, y2, line=(:dash, :red))
 plot!(title="Trigonometric functions",
         xlabel="angle",
         ylabel="sin(x) and cos(x)",
-        xlims=(0,2pi), ylims=(-2, 2), size=(600, 600))
+        xlims=(0,2pi), ylims=(-2, 2), size=(600, 600)) |> PNG
 
 #===
 ### Plotting multiple series
@@ -330,7 +330,7 @@ plot(1:time, [walker1 walker2 walker3 walker4 walker5],
     xlabel="time", ylabel="position",
     label=["walker1" "walker2" "walker3" "walker4" "walker5"],
     legend=:topleft
-)
+) |> PNG
 
 #===
 ### Parameteric plots
@@ -346,11 +346,11 @@ let
     f = x -> 5exp(-x^2)
     g = x -> x^2
     plot([f, g], -3, 3, label=["f" "g"], legend=:top)
-end
+end |> PNG
 
 #---
 
-plot(sin, t->sin(2t), 0, 2π, leg=false, fill=(0,:orange))
+plot(sin, t->sin(2t), 0, 2π, leg=false, fill=(0,:orange)) |> PNG
 
 #===
 ## 3D line plot
@@ -360,7 +360,7 @@ Similar to 2D line plots.
 `plot(fx(t), fy(t), fz(t), tmin, tmax [, kwargs...])`
 ===#
 
-plot(cos, sin, t -> sin(5t), 0, 2pi, legend=nothing)
+plot(cos, sin, t -> sin(5t), 0, 2pi, legend=nothing) |> PNG
 
 # ### Line colors
 # `plot(x, y, c=color)`
@@ -377,7 +377,7 @@ y4 = besselj.(4,x)
 y5 = besselj.(5,x)
 y6 = besselj.(6,x)
 colors = [:red :green :blue :cyan :magenta :yellow :black]
-plot(x, [y0 y1 y2 y3 y4 y5 y6], c=colors)
+plot(x, [y0 y1 y2 y3 y4 y5 y6], c=colors) |> PNG
 
 # ### Line styles
 
@@ -388,20 +388,20 @@ using Plots
 
 style = Plots.supported_styles()[2:end]
 style = reshape(style, 1, length(style))
-plot(x, [y0 y1 y2 y3 y4], line=(3, style))
+plot(x, [y0 y1 y2 y3 y4], line=(3, style)) |> PNG
 
 # ## Polar Plots
 # `plot(θ, r, proj=:polar)`
 
 using Plots
-plot(θ -> 1 + cos(θ) * sin(θ)^2, 0, 2π, proj=:polar, lims=(0, 1.5))
+plot(θ -> 1 + cos(θ) * sin(θ)^2, 0, 2π, proj=:polar, lims=(0, 1.5)) |> PNG
 
 # ### Rose Plots
 # `plot(..., proj=:polar, line=:steppre)`
 
 n = 24
 R = rand(n+1)
-plot(0:2pi/n:2pi, R, proj=:polar, line=:steppre, lims=(0, 1), legend=nothing)
+plot(0:2pi/n:2pi, R, proj=:polar, line=:steppre, lims=(0, 1), legend=nothing) |> PNG
 
 #===
 ## Quiver Plots
@@ -419,14 +419,14 @@ x = repeat(-3:(2*3)/n:3, 1, n) |> vec
 y = repeat(-3:(2*3)/n:3, 1, n)' |> vec
 vx = f.(x,y) .* cos.(atan.(y,x)) |> vec
 vy = f.(x,y) .* sin.(atan.(y,x)) |> vec
-quiver(x, y, quiver=(vx, vy), aspect_ratio=:equal)
+quiver(x, y, quiver=(vx, vy), aspect_ratio=:equal) |> PNG
 
 #---
 
 g = (x, y) -> [f(x,y) * cos(atan(y,x)), f(x,y) * sin(atan(y,x))]
 xx = [x for y in -3:(2*3)/n:3, x in -3:(2*3)/n:3]
 yy = [y for y in -3:(2*3)/n:3, x in -3:(2*3)/n:3]
-quiver(xx, yy, quiver=g, aspect_ratio=:equal, color=:black)
+quiver(xx, yy, quiver=g, aspect_ratio=:equal, color=:black) |> PNG
 
 # ## Scatter Plots
 # 2D Scatter Plots: `scatter(xpos, ypos)`
@@ -437,15 +437,15 @@ n = 50
 x = rand(n)
 y = rand(n)
 ms = rand(50) * 30
-scatter(x, y, markersize=ms)
+scatter(x, y, markersize=ms) |> PNG
 
 # 3D Scatter Plots: `scatter(xpos, ypos, zpos)`
-scatter(x, y, rand(n), markersize=ms)
+scatter(x, y, rand(n), markersize=ms) |> PNG
 
 # ## Stairstep plot
 # `plot(..., line=:steppre)`
 
-plot(sin.(0:0.3:2pi), line=:steppre, label="Steps")
+plot(sin.(0:0.3:2pi), line=:steppre, label="Steps") |> PNG
 
 #===
 ## Stem plot
@@ -455,7 +455,7 @@ A.k.a lolipop plot.
 `plot(..., line=:stem)`
 ===#
 
-plot(sin.(0:0.3:2pi), line=:stem, marker=:star, markersize=20, ylims=(-1.1, 1.1), label="Stars")
+plot(sin.(0:0.3:2pi), line=:stem, marker=:star, markersize=20, ylims=(-1.1, 1.1), label="Stars") |> PNG
 
 #===
 ## Subplots
@@ -472,13 +472,13 @@ using Plots
 data = rand(100, 4)
 
 # create a 2x2 grid, and map each of the 4 series to one of the subplots
-plot(data, layout = 4)
+plot(data, layout = 4) |> PNG
 
 # More complex grid layouts can be created with the grid(...) constructor:
-plot(data, layout = grid(4, 1, heights=[0.1 ,0.4, 0.4, 0.1]))
+plot(data, layout = grid(4, 1, heights=[0.1 ,0.4, 0.4, 0.1])) |> PNG
 
 # Adding titles and labels
-plot(data, layout = 4, label=["a" "b" "c" "d"], title=["1" "2" "3" "4"])
+plot(data, layout = 4, label=["a" "b" "c" "d"], title=["1" "2" "3" "4"]) |> PNG
 
 # Use `@layout` macro
 l = @layout [
@@ -489,10 +489,10 @@ plot(
     rand(10, 11),
     layout = l, legend = false, seriestype = [:bar :scatter :path],
     title = ["($i)" for j in 1:1, i in 1:11], titleloc = :right, titlefont = font(8)
-)
+) |> PNG
 
 # Use _ to ignore a spot in the layout
-plot((plot() for i in 1:7)..., layout=@layout([_ ° _; ° ° °; ° ° °]))
+plot((plot() for i in 1:7)..., layout=@layout([_ ° _; ° ° °; ° ° °])) |> PNG
 
 # ### Build subplots one by one
 
@@ -500,7 +500,7 @@ p1 = plot(sin, 0, 2pi, xlabel="x1")
 p2 = plot(cos, 0, 2pi, xlabel="x2")
 p3 = histogram(randn(1000), xlabel="x3")
 p4 = plot(x->exp(-x^2), -3, 3, xlabel="x4")
-plot(p1, p2, p3, p4)
+plot(p1, p2, p3, p4) |> PNG
 
 #===
 ## Surface plots
@@ -516,13 +516,13 @@ using Plots
 x = y = -10:10
 f = (x , y) -> x^2 + y^2
 
-surface(x, y, f)
+surface(x, y, f) |> PNG
 
 # surface style
-plot(x, y, f, linetype=:surface)
+plot(x, y, f, linetype=:surface) |> PNG
 
 # wireframe style
-plot(x, y, f, linetype=:wireframe)
+plot(x, y, f, linetype=:wireframe) |> PNG
 
 # ## Twin Y Axis
 # `plot!(twinx())`
@@ -537,7 +537,7 @@ plot!(
     leg=:bottomright,
     size=(600, 400)
 )
-plot!(right_margin=15Plots.mm)
+plot!(right_margin=15Plots.mm) |> PNG
 
 # ## Animations
 
@@ -573,7 +573,7 @@ plt = plot3d(
     zlim = (0, 60),
     title = "Lorenz Attractor",
     marker = 2,
-)
+) |> PNG
 
 # pushing new points to the plot
 anim = @animate for i=1:1500
@@ -581,4 +581,4 @@ anim = @animate for i=1:1500
     push!(plt, attractor.x, attractor.y, attractor.z)
 end
 
-gif(anim, fps = 15)
+mp4(anim, fps = 15)
