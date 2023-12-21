@@ -15,7 +15,6 @@ env:
   NPROC: '2' # Number of Julia processes to run the notebooks
   PY_VER: '3.12'
   CACHE_NUM: '1'
-  JULIA_NUM_THREADS: 'auto'
   JULIA_CONDAPKG_BACKEND: 'Null'
   JULIA_CI: 'true'
 
@@ -94,6 +93,7 @@ jobs:
     permissions:
       pages: write # to deploy to Pages
       id-token: write # to verify the deployment originates from an appropriate source
+      actions: read # to download an artifact uploaded by `actions/upload-pages-artifact@v3`
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
