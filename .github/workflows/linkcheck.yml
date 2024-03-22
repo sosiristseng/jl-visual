@@ -27,12 +27,11 @@ jobs:
         uses: julia-actions/setup-julia@v1
       - name: Convert literate notebooks to ipynb files
         shell: julia --color=yes {0}
-        working-directory: docs
         run: |
           import Pkg
           Pkg.add("Literate")
           using Literate
-          for (root, dirs, files) in walkdir(pwd())
+          for (root, dirs, files) in walkdir("docs")
             for file in files
               if endswith(file, ".jl")
                 nb = joinpath(root, file)
