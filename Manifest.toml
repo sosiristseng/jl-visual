@@ -17,9 +17,9 @@ weakdeps = ["ChainRulesCore", "Test"]
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "cea4ac3f5b4bc4b3000aa55afb6e5626518948fa"
+git-tree-sha1 = "6a55b747d1812e699320963ffde36f1ebdda4099"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "4.0.3"
+version = "4.0.4"
 weakdeps = ["StaticArrays"]
 
     [deps.Adapt.extensions]
@@ -821,9 +821,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.PythonCall]]
 deps = ["CondaPkg", "Dates", "Libdl", "MacroTools", "Markdown", "Pkg", "REPL", "Requires", "Serialization", "Tables", "UnsafePointers"]
-git-tree-sha1 = "cc12703f54d64be5eae836a128f0c74564d1a069"
+git-tree-sha1 = "0fe6664f742903eab8929586af78e10a51b33577"
 uuid = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
-version = "0.9.18"
+version = "0.9.19"
 
 [[deps.PythonPlot]]
 deps = ["Colors", "CondaPkg", "LaTeXStrings", "PythonCall", "Sockets", "Test", "VersionParsing"]
@@ -1067,9 +1067,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "a09c933bebed12501890d8e92946bbab6a1690f1"
+git-tree-sha1 = "14389d51751169994b2e1317d5c72f7dc4f21045"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.10.5"
+version = "0.10.6"
 weakdeps = ["Random", "Test"]
 
     [deps.TranscodingStreams.extensions]
