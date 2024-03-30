@@ -28,17 +28,16 @@ jobs:
       uses: actions/checkout@v4
     - name: Setup Python
       uses: actions/setup-python@v5
-      id: cp
+      id: setup-python
       with:
         python-version: '3.x'
-    - name: Cache pip dependencies
+    - name: Cache python
       uses: actions/cache@v4
       id: cache-py
-      if: ${{ contains(runner.name, 'GitHub Actions') }}
       with:
+        key: ${{ runner.os }}-py-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
         path: ${{ env.pythonLocation }}
-        key:  ${{ runner.os }}-pip-${{ steps.cp.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
-    - name: Install pip dependencies if cache miss
+    - name: Install Python dependencies
       if: ${{ steps.cache-py.outputs.cache-hit != 'true' }}
       run: pip install -r requirements.txt
     - name: Cache executed notebooks
@@ -70,8 +69,15 @@ jobs:
     - name: Install Julia packages
       if: ${{ !contains(runner.name, 'GitHub Actions') || steps.cache-julia.outputs.cache-hit != 'true' }}
       env:
-        PYTHON: ${{ env.pythonLocation }}/python
-      run: julia --color=yes instantiate.jl
+        PYTHON: ${{ steps.setup-python.outputs.python-path }}
+      shell: julia --color=yes {0}
+      run: |
+        using Pkg, Dates
+        Pkg.add(["IJulia", "Literate", "PrettyTables"])
+        Pkg.activate(".")
+        Pkg.instantiate()
+        Pkg.precompile()
+        Pkg.gc(collect_delay=Day(0))
     - name: Save Julia packages
       uses: actions/cache/save@v4
       if: ${{ contains(runner.name, 'GitHub Actions') && steps.cache-julia.outputs.cache-hit != 'true' }}
