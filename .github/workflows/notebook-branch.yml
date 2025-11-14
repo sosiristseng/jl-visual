@@ -1,4 +1,4 @@
-name: Deploy on Notebook branch
+name: Deploy Notebook branch
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ jobs:
     name: Deploy notebook branch
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
@@ -35,10 +35,10 @@ jobs:
             end
           end
         end
-    - name: Deploy pages
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: Deploy notebooks
+      uses: peaceiris/actions-gh-pages@v4
       with:
-        folder: .
-        branch: ipynb
-        single-commit: true
-        commit-message: ${{ github.event.head_commit.message }}
+        publish_dir: .
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: ipynb
+        commit_message: ${{ github.event.head_commit.message }}
