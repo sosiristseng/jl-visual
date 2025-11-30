@@ -1,8 +1,6 @@
-# Julia visualization example notebooks
+# Visualization
 
-- [Summary in a discourse thread by Chris Rackauckas](https://discourse.julialang.org/t/comparison-of-plotting-packages/99860/2)
-
-## Packages
+[Summary in a discourse thread by Chris Rackauckas](https://discourse.julialang.org/t/comparison-of-plotting-packages/99860/2)
 
 - https://github.com/JuliaPlots/Plots.jl : powerful and convenient visualization with multiple backends. See also [Plots.jl docs](http://docs.juliaplots.org/latest/)
 - https://github.com/JuliaPy/PythonPlot.jl : `matplotlib` in Julia. See also [matplotlib docs](https://matplotlib.org/stable/index.html)

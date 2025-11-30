@@ -1,8 +1,18 @@
 # Table of contents
-# Learn more at https://jupyterbook.org/customize/toc.html
+# Learn more at https://jupyterbook.org/v1/structure/toc.html
 
 format: jb-book
 root: index
-chapters:
-  - file: pyplot-gizmaa
-  - file: plotsjl-gallery
+parts:
+  - caption: Modeling
+    chapters:
+    - file: modeling/index
+    - file: modeling/51-moothfunc
+    - file: modeling/52-odef-from-mtk
+    - file: modeling/53-nodomainerr
+    - file: modeling/54-componentarrays
+  - caption: Visualization
+    chapters:
+    - file: visual/index
+    - file: visual/pyplot-gizmaa
+    - file: visual/plotsjl-gallery
