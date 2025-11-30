@@ -7,7 +7,7 @@ parts:
   - caption: Modeling
     chapters:
     - file: modeling/index
-    - file: modeling/51-moothfunc
+    - file: modeling/51-smoothfunc
     - file: modeling/52-odef-from-mtk
     - file: modeling/53-nodomainerr
     - file: modeling/54-componentarrays
