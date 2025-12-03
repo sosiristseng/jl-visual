@@ -11,6 +11,7 @@ parts:
     - file: modeling/52-odef-from-mtk
     - file: modeling/53-nodomainerr
     - file: modeling/54-componentarrays
+    - file: modeling/55-kapattern
   - caption: Visualization
     chapters:
     - file: visual/index
