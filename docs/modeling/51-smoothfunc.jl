@@ -19,7 +19,7 @@ end
 
 plot(smoothheaviside, -1, 1)
 
-### Smooth step function with `sqrt`
+# Smooth step function with `sqrt`
 function smoothstep_sqrt(x; c=(1//2)^10)
     0.5 * (x / (sqrt(x^2 + c)) + 1)
 end
