@@ -17,3 +17,7 @@ parts:
     - file: visual/index
     - file: visual/pyplot-gizmaa
     - file: visual/plotsjl-gallery
+  - caption: Misc
+    chapters:
+    - file: pkg
+    - file: docproc
