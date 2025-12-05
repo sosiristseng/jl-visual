@@ -21,3 +21,4 @@ parts:
     chapters:
     - file: pkg
     - file: docproc
+    - file: array-tips
