@@ -13,7 +13,8 @@ Pkg.status(; outdated=true)
 
 You could include jl files as submodules like this
 
-```julia title="main.jl"
+```julia
+## main.jl
 include("foo.jl")
 using .Foo
 
