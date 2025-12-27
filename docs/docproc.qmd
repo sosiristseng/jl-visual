@@ -5,7 +5,6 @@
 - Use `JSON.jl` to read the `ipynb` file and remove the output data.
 - Use `Base.format_bytes()` to show human-readable file size.
 
-
 ```julia
 function strip_svg(nbpath)
     oldfilesize = filesize(nbpath)
@@ -54,4 +53,22 @@ function to_literate(nbpath; shell_or_help=r"^\s*[;?]")
     end
     return jlpath
 end
+```
+
+## Force display format to PNG
+
+In the VSCode plot panel and [Literate.jl](https://github.com/fredrikekre/Literate.jl) notebooks, PNG images are generally smaller than SVG ones. To force plots to be shown as PNG images, you can use [DisplayAs.jl](https://github.com/tkf/DisplayAs.jl) to show objects in a chosen MIME type.
+
+```julia
+import DisplayAs.PNG
+using Plots
+plot(rand(6)) |> PNG
+```
+
+If you don't want to install another package, you could just use `display()`.
+
+```julia
+using Plots
+PNG(img) = display("image/png", img)
+plot(rand(6)) |> PNG
 ```
